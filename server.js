@@ -1,20 +1,35 @@
 var oracledb = require('oracledb');
-
+var dbConfig = require('/public/dbconfig.js');
 var express = require('express');
+
+var bodyParser = require("body-parser");
+var applications = require('./public/services.js');
+
 
 var app = express();
 
+app.use(express.static(__dirname + "/public"));
+app.use(bodyParser.json());
 
+applications(app, oracledb);
 
-app.get('/', function (req, res) {
+oracledb.createPool ({
+	user : dbConfig.user,
+	password : dbConfig.password,
+	connectString : dbConfig.connectString,
+	poolMax : 44,
+	poolMin : 2,
+	poolIncrement : 5,
+	poolTimeout : 4
+}, 
+function (err, pool) {
+	if (err) {
+		console.error('createPool() callback: ' + err.message);
+		return;
+	}
+
 	
-	res.send('Hello World');
-});
-
-app.get('/getConnection', function(req, res){
-	req.body
 })
-
 
 // oracledb.getConnection(
 //   {
@@ -43,11 +58,7 @@ app.get('/getConnection', function(req, res){
 //       });
 //   });
 
+var host = "127.0.0.1";
+var port = 3000;
 
-
-var server =  app.listen(3000, 'localhost',function() {
-  var host = server.address().address;
-  var port = server.address().port;
-
-  console.log("Start listening at %s on port %s", host, port);
-})
+var server =  app.listen(port, host);
